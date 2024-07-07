@@ -1,0 +1,18 @@
+body {
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.hidden {
+  display: none;
+}
+
+svg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transition-property: transform;
+  transition-timing-function: linear;
+  transition-duration: 100ms;
+}
