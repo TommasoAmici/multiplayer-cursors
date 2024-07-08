@@ -1,3 +1,4 @@
+import { ColorPicker } from "./ColorPicker";
 import { CursorTemplate } from "./CursorTemplate";
 
 export function Page() {
@@ -9,8 +10,9 @@ export function Page() {
         <script type="module" src="/client/index.ts"></script>
       </head>
       <body>
-        <h1>Multiplayer Cursors</h1>
         <CursorTemplate />
+        <canvas id="canvas" />
+        <ColorPicker />
       </body>
     </html>
   );

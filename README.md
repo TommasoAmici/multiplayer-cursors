@@ -1,8 +1,9 @@
-# multiplayer-cursors
+# multiplayer-whiteboard
 
-https://github.com/TommasoAmici/multiplayer-cursors/assets/424525/1461692a-0aeb-47e6-bd09-caa3ee9b89fc
+<https://github.com/TommasoAmici/multiplayer-cursors/assets/424525/1461692a-0aeb-47e6-bd09-caa3ee9b89fc>
 
-A very minimal example of Figma-like multiplayer cursors using WebSockets.
+A very minimal example of Figma-like/Miro-like multiplayer collaborative board
+using WebSockets.
 
 This small example uses Bun to run a server to hold the WebSocket connections
 and to serve the client files.

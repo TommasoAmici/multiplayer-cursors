@@ -16,3 +16,36 @@ svg {
   transition-timing-function: linear;
   transition-duration: 100ms;
 }
+
+canvas#canvas {
+  height: 100%;
+  width: 100%;
+  background-color: rgb(255, 250, 243);
+}
+
+/* TODO add tailwind directly? */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+#color-picker {
+  position: fixed;
+  inset: 0;
+  list-style: none;
+  width: fit-content;
+}
+
+button.color {
+  border-radius: 100%;
+  height: 20px;
+  width: 20px;
+  border: 1px solid #444;
+}

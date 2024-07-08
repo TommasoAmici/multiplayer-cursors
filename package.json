@@ -1,12 +1,12 @@
 {
-  "name": "multiplayer-cursors",
+  "name": "multiplayer-whiteboard",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.5.3"
   },
   "dependencies": {
     "@types/lodash": "^4.17.6",

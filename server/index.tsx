@@ -1,6 +1,7 @@
 import type { ServerWebSocket } from "bun";
 import path from "path";
 import { renderToReadableStream } from "react-dom/server";
+import type { Message } from "../lib/message";
 import { Page } from "./Page";
 
 /**
@@ -60,19 +61,15 @@ const server = Bun.serve({
   },
   websocket: {
     async message(ws, message) {
-      const parsed:
-        | { id: string; event: "open" }
-        | { id: string; event: "close" }
-        | { id: string; x: number; y: number; event: "mousemove" } = JSON.parse(
-        message.toString()
-      );
-      switch (parsed.event) {
+      const parsed: Message = JSON.parse(message.toString());
+      switch (parsed.data.event) {
         case "open":
           room[parsed.id] = ws;
           break;
+        // @ts-expect-error we want close to fallback to it's propagated
+        // to all connected clients
         case "close":
           delete room[parsed.id];
-          break;
         default:
           for (const member of Object.values(room)) {
             member.send(message);

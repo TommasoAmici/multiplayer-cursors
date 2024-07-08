@@ -1,78 +1,65 @@
-import throttle from "lodash/throttle";
-
-const colors = [
-  "#dc2626",
-  "#eab308",
-  "#10b981",
-  "#0ea5e9",
-  "#8b5cf6",
-  "#64748b",
-];
-
-const cyrb53 = (str: string, seed = 0) => {
-  let h1 = 0xdeadbeef ^ seed,
-    h2 = 0x41c6ce57 ^ seed;
-  for (let i = 0, ch; i < str.length; i++) {
-    ch = str.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
-  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
-  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-
-  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
-};
+import type { Message } from "../lib/message";
+import { Cursors } from "./cursors";
+import { Whiteboard } from "./whiteboard";
 
 document.addEventListener("DOMContentLoaded", () => {
+  const canvas = document.querySelector<HTMLCanvasElement>("canvas");
+  if (canvas === null) {
+    throw new Error("No canvas found");
+  }
+  const ctx = canvas.getContext("2d");
+  if (ctx === null) {
+    throw new Error("Failed to get context");
+  }
+
+  const myID = crypto.randomUUID();
   const host = new URL(document.URL).host;
   const socket = new WebSocket(`ws://${host}`);
-  const myID = crypto.randomUUID();
+
+  function send(msg: object) {
+    socket.send(JSON.stringify({ id: myID, data: msg }));
+  }
 
   socket.addEventListener("open", () => {
-    socket.send(JSON.stringify({ id: myID, event: "open" }));
+    send({ event: "open" });
   });
 
   socket.addEventListener("close", () => {
-    socket.send(JSON.stringify({ id: myID, event: "close" }));
+    send({ event: "close" });
   });
+
+  const cursors = new Cursors(send);
+  cursors.init(canvas);
+
+  const board = new Whiteboard(canvas, ctx, send);
+  board.init();
 
   socket.addEventListener("message", (event) => {
-    const { id, x, y } = JSON.parse(event.data);
-    if (id === myID) {
+    const msg = JSON.parse(event.data) as Message;
+    if (msg.id === myID) {
       return;
     }
-    let cursor = document.getElementById(id);
-    if (cursor === null) {
-      const baseCursor = document.getElementById("cursor");
-      if (baseCursor === null) {
-        throw new Error("No base cursor");
-      }
-      const cursor = baseCursor.cloneNode(true) as HTMLElement;
-
-      cursor.id = id;
-      cursor.classList.remove("hidden");
-
-      const color = colors[cyrb53(id) % colors.length];
-      cursor.setAttribute("fill", color);
-
-      cursor.style.transform = `translate(${x}px, ${y}px)`;
-      baseCursor.after(cursor);
-    } else {
-      cursor.style.transform = `translate(${x}px, ${y}px)`;
+    switch (msg.data.event) {
+      case "close":
+        cursors.remove(msg.id);
+        break;
+      case "cursor":
+        cursors.update(msg.id, msg.data.x, msg.data.y);
+        break;
+      case "shape-drawing":
+        board.addDrawing(msg.data.shape);
+        break;
+      case "shape":
+        board.add(msg.data.shape);
+        break;
+      default:
+        break;
     }
   });
 
-  const mousemoveListener = throttle((e: MouseEvent) => {
-    const data = JSON.stringify({
-      id: myID,
-      x: e.clientX,
-      y: e.clientY,
-      event: "mousemove",
-    });
-    socket.send(data);
-  }, 60);
-
-  document.addEventListener("mousemove", mousemoveListener);
+  function renderingLoop() {
+    board.render();
+    requestAnimationFrame(renderingLoop);
+  }
+  requestAnimationFrame(renderingLoop);
 });
